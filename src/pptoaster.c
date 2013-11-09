@@ -64,7 +64,7 @@ void pptoaster_handle_animation_in_stopped(Animation *animation, bool finished, 
 
   GSize size = pptoaster.layer_frame.size;
   toframe.size = size;
-  toframe.origin = GPoint(PPTOASTER_EDGE_MARGIN, pptoaster.direction? pptoaster.window_size.h : -size.h - PPTOASTER_EDGE_MARGIN);
+  toframe.origin.x = PPTOASTER_EDGE_MARGIN;
   switch (pptoaster.direction) {
     case PPToasterAppearFromBottom:
       toframe.origin.y = pptoaster.window_size.h;
@@ -79,7 +79,6 @@ void pptoaster_handle_animation_in_stopped(Animation *animation, bool finished, 
   }
 
   pptoaster_destroy_animation();
-  // property_animation_destroy(pptoaster.propanim); // is this causing the crash??
   pptoaster.propanim = property_animation_create_layer_frame(pptoaster.layer, NULL, &toframe);
   Animation *internal_animation = &pptoaster.propanim->animation;
   animation_set_delay(internal_animation, pptoaster.show_duration);
@@ -161,6 +160,7 @@ void pptoaster_bind_to_window() {
   pptoaster.layer_frame = GRect(0, 0, pptoaster.window_size.w - PPTOASTER_EDGE_MARGIN*2, PPTOASTER_HEIGHT);
   layer_set_frame(pptoaster.layer, pptoaster.layer_frame);
 
+  // this should also ensure the toaster is at the top depth
   layer_add_child(window_get_root_layer(window), pptoaster.layer);
 }
 
