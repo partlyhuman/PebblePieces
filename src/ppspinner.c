@@ -24,6 +24,7 @@ typedef struct {
 
 static void ppspinner_handle_timer(void *layer) {
   PPSpinnerData *data = (PPSpinnerData *)layer_get_data(layer);
+  data->current_frame++;
   data->timer = app_timer_register(data->update_ms, ppspinner_handle_timer, layer);
   layer_mark_dirty((Layer *)layer);
 }
@@ -32,7 +33,7 @@ static void ppspinner_update(Layer *layer, GContext *g) {
   PPSpinnerData *data = (PPSpinnerData *)layer_get_data(layer);
   GRect bounds = layer_get_frame(layer);
   // cache some values on stack
-  int frame_number = ++data->current_frame;
+  int frame_number = data->current_frame;
   int corner_radius = data->corner_radius;
   int segments = data->segments; 
 
