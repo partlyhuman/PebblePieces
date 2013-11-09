@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "ppspinner.h"
+#include "pptoaster.h"
 
 ///////////////////////////////////
 // PebblePieces: Reusable Pebble components.
@@ -8,8 +9,14 @@
 // This file serves as a demonstration of the available components.
 //////////////////////////////////
 
-static Window *window;
+char* toaster_test_strings[] = {
+  "ERROR 404!",
+  "Geolocating you...",
+  "Communicating with phone...",
+  "Loading..."
+};
 
+static Window *window;
 static Layer *demo_layers[1];
 
 static void demo_layers_push(Layer *layer) {
@@ -42,6 +49,9 @@ static void change_demo_layer_by(int delta) {
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+
+  char *message = toaster_test_strings[rand() % ARRAY_LENGTH(toaster_test_strings)];
+  pptoaster_pop(message, 1500, (rand() % 3));
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -59,16 +69,18 @@ static void click_config_provider(void *context) {
 }
 
 static void window_load(Window *window) {
-  Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(window_layer);
+  // Layer *window_layer = window_get_root_layer(window);
+  // GRect bounds = layer_get_bounds(window_layer);
 
   demo_layers_push(ppspinner_create(
     GRect(20, 20, 25, 10), //frame
     3, //segments
-    250, //ms between updates
-    2 //corner radius
+    2, //corner radius
+    250 //ms between updates
   ));
   change_demo_layer_by(+1);
+
+  pptoaster_init(window);
 }
 
 static void window_unload(Window *window) {

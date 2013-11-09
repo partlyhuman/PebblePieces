@@ -3,7 +3,8 @@
 
 typedef Layer PPSpinnerLayer;
 
-PPSpinnerLayer *ppspinner_create(GRect frame, int segments, int speed, int corner_radius);
+PPSpinnerLayer *ppspinner_create(GRect frame, int segments, int corner_radius, int update_ms);
+
 void ppspinner_destroy(PPSpinnerLayer *);
 void ppspinner_start(PPSpinnerLayer *);
 void ppspinner_stop(PPSpinnerLayer *);

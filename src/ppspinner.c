@@ -7,7 +7,7 @@ typedef struct {
   // "public"
   int segments;
   int corner_radius;
-  int speed;
+  int update_ms;
 
   // "private"
   int current_frame;
@@ -18,7 +18,7 @@ typedef struct {
 
 static void ppspinner_handle_timer(void *layer) {
   GETDATA(layer);
-  data->timer = app_timer_register(data->speed, ppspinner_handle_timer, layer);
+  data->timer = app_timer_register(data->update_ms, ppspinner_handle_timer, layer);
   layer_mark_dirty((Layer *)layer);
 }
 
@@ -56,7 +56,7 @@ void ppspinner_start(PPSpinnerLayer *layer) {
   if (data->timer != NULL) {
     APP_LOG(APP_LOG_LEVEL_WARNING, "Already running");
   } else {
-    data->timer = app_timer_register(data->speed, ppspinner_handle_timer, layer);
+    data->timer = app_timer_register(data->update_ms, ppspinner_handle_timer, layer);
   }
 }
 
@@ -70,23 +70,21 @@ void ppspinner_stop(PPSpinnerLayer *layer) {
   }
 }
 
+void ppspinner_destroy(PPSpinnerLayer *spinner) {
+  ppspinner_stop(spinner);
+  layer_destroy(spinner);
+}
 
-PPSpinnerLayer *ppspinner_create(GRect frame, int segments, int speed, int corner_radius) {
+PPSpinnerLayer *ppspinner_create(GRect frame, int segments, int corner_radius, int update_ms) {
   PPSpinnerLayer *layer = layer_create_with_data(frame, sizeof(PPSpinnerData));
   layer_set_update_proc(layer, ppspinner_update);
 
   GETDATA(layer);
   data->segments = segments;
-  data->speed = speed;
+  data->update_ms = update_ms;
   data->corner_radius = corner_radius;
   data->current_frame = 0;
   data->timer = NULL;
 
   return layer;
 }
-
-void ppspinner_destroy(PPSpinnerLayer *spinner) {
-  ppspinner_stop(spinner);
-  layer_destroy(spinner);
-}
-
