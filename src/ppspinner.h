@@ -1,3 +1,11 @@
+///////////////////////////////////
+// PebblePieces: Reusable Pebble components.
+// by Roger Braunstein 2013
+//
+// PPSpinner
+// Animated, customizable "stepping bar" indefinite loader
+///////////////////////////////////
+
 #pragma once
 #include <pebble.h>
 

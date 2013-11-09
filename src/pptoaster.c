@@ -1,3 +1,11 @@
+///////////////////////////////////
+// PebblePieces: Reusable Pebble components.
+// by Roger Braunstein 2013
+//
+// PPToaster
+// Animated, self-dismissing modal notifications with minimal setup
+///////////////////////////////////
+
 #include "pptoaster.h"
 
 #define PPTOASTER_ANIMATION_DURATION 350
@@ -20,13 +28,17 @@ struct PPToasterModule {
 };
 struct PPToasterModule pptoaster;
 
+// a few forward declarations for utility functions
+void pptoaster_lazy_init();
+void pptoaster_bind_to_window();
+void pptoaster_destroy_animation();
+
 void pptoaster_draw(struct Layer *layer, GContext *g) {
   static GTextLayoutCacheRef text_layout_cache;
 
   GRect bounds = layer_get_frame(layer);
   bounds.origin = GPointZero;
 
-  LOG_RECT(bounds);
   graphics_context_set_fill_color(g, GColorWhite);
   graphics_context_set_stroke_color(g, GColorBlack);
   graphics_context_set_text_color(g, GColorBlack);
@@ -38,16 +50,16 @@ void pptoaster_draw(struct Layer *layer, GContext *g) {
   }
 
   graphics_draw_text(g, pptoaster.message, pptoaster.font, bounds, GTextOverflowModeFill, GTextAlignmentCenter, text_layout_cache);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Draw-");
 }
 
 void pptoaster_handle_animation_out_stopped(Animation *animation, bool finished, void *property_animation_context) {
-  property_animation_destroy(pptoaster.propanim);
+  if (!finished) return;
+  pptoaster_destroy_animation();
   layer_set_hidden(pptoaster.layer, true);
-  pptoaster.propanim = NULL;
 }
 
 void pptoaster_handle_animation_in_stopped(Animation *animation, bool finished, void *property_animation_context) {
+  if (!finished) return;
   static GRect toframe;
 
   GSize size = pptoaster.layer_frame.size;
@@ -66,6 +78,7 @@ void pptoaster_handle_animation_in_stopped(Animation *animation, bool finished, 
       break;
   }
 
+  pptoaster_destroy_animation();
   // property_animation_destroy(pptoaster.propanim); // is this causing the crash??
   pptoaster.propanim = property_animation_create_layer_frame(pptoaster.layer, NULL, &toframe);
   Animation *internal_animation = &pptoaster.propanim->animation;
@@ -83,12 +96,16 @@ void pptoaster_pop(char* message, int show_duration, PPToasterAppearDirection di
   static GRect fromframe, toframe;
   if (show_duration <= 0) return;
 
+  pptoaster_lazy_init();
+  pptoaster_bind_to_window();
+
   strncpy(pptoaster.message, message, sizeof(pptoaster.message));
   pptoaster.show_duration = show_duration;
   pptoaster.direction = direction;
 
+  // destroy existing animation
   if (NULL != pptoaster.propanim) {
-    property_animation_destroy(pptoaster.propanim);
+    pptoaster_destroy_animation();
   }
 
   // setup animations
@@ -125,6 +142,42 @@ void pptoaster_set_system_font(char *font_name) {
   pptoaster.font = fonts_get_system_font(font_name);
 }
 
+void pptoaster_destroy_animation() {
+  animation_unschedule(&pptoaster.propanim->animation);
+  property_animation_destroy(pptoaster.propanim);
+  pptoaster.propanim = NULL;
+}
+
+void pptoaster_bind_to_window() {
+  layer_remove_from_parent(pptoaster.layer);
+
+  Window *window = window_stack_get_top_window();
+  pptoaster.window_size = layer_get_frame(window_get_root_layer(window)).size;
+  if (!window_get_fullscreen(window)) {
+    // manually adjust for status bar ( not reported in root layer height :/ )
+    pptoaster.window_size.h -= 15;
+  }
+
+  pptoaster.layer_frame = GRect(0, 0, pptoaster.window_size.w - PPTOASTER_EDGE_MARGIN*2, PPTOASTER_HEIGHT);
+  layer_set_frame(pptoaster.layer, pptoaster.layer_frame);
+
+  layer_add_child(window_get_root_layer(window), pptoaster.layer);
+}
+
+void pptoaster_lazy_init() {
+  if (pptoaster.layer != NULL) {
+    return;
+  }
+
+  pptoaster.layer = layer_create(GRectZero);
+  layer_set_update_proc(pptoaster.layer, pptoaster_draw);
+  layer_set_hidden(pptoaster.layer, true);
+
+  // defaults
+  pptoaster.message[0] = '\0';
+  pptoaster_set_system_font(FONT_KEY_GOTHIC_14);
+}
+
 void pptoaster_deinit() {
   if (NULL != pptoaster.propanim) {
     property_animation_destroy(pptoaster.propanim);
@@ -133,25 +186,4 @@ void pptoaster_deinit() {
     layer_remove_from_parent(pptoaster.layer);
     layer_destroy(pptoaster.layer);
   }
-}
-
-void pptoaster_init(Window *parent) {
-  //TODO make sure we haven't already been initialized
-  GRect bounds = layer_get_frame(window_get_root_layer(parent));
-  GRect toaster_frame = GRect(0, 0, bounds.size.w - PPTOASTER_EDGE_MARGIN*2, PPTOASTER_HEIGHT);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Made layer at size %dx%d", toaster_frame.size.w, toaster_frame.size.h);
-  pptoaster.layer = layer_create(toaster_frame);
-  pptoaster.layer_frame = toaster_frame;
-  pptoaster.window_size = bounds.size;
-  if (window_get_fullscreen(parent)) {
-    pptoaster.window_size.h -= 10;
-  }
-  layer_set_update_proc(pptoaster.layer, pptoaster_draw);
-  layer_set_hidden(pptoaster.layer, true);
-  layer_add_child(window_get_root_layer(parent), pptoaster.layer);
-
-  // defaults
-  pptoaster.propanim = NULL;
-  pptoaster.message[0] = '\0';
-  pptoaster_set_system_font(FONT_KEY_GOTHIC_14);
 }

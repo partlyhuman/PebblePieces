@@ -1,18 +1,18 @@
-#include <pebble.h>
-#include "ppspinner.h"
-#include "pptoaster.h"
-
 ///////////////////////////////////
 // PebblePieces: Reusable Pebble components.
-// Partlyhuman inc. 2013
+// by Roger Braunstein 2013
 // 
 // This file serves as a demonstration of the available components.
 //////////////////////////////////
 
+#include <pebble.h>
+#include "ppspinner.h"
+#include "pptoaster.h"
+
 char* toaster_test_strings[] = {
-  "ERROR 404!",
+  "Accepted",
   "Geolocating you...",
-  "Communicating with phone...",
+  "Talking to phone...",
   "Loading..."
 };
 
@@ -49,9 +49,8 @@ static void change_demo_layer_by(int delta) {
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-
   char *message = toaster_test_strings[rand() % ARRAY_LENGTH(toaster_test_strings)];
-  pptoaster_pop(message, 1500, (rand() % 3));
+  pptoaster_pop(message, 200, (rand() % 3));
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -79,8 +78,6 @@ static void window_load(Window *window) {
     250 //ms between updates
   ));
   change_demo_layer_by(+1);
-
-  pptoaster_init(window);
 }
 
 static void window_unload(Window *window) {
@@ -99,6 +96,7 @@ static void init(void) {
 
 static void deinit(void) {
   window_destroy(window);
+  pptoaster_deinit();
 }
 
 int main(void) {

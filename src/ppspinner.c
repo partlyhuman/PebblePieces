@@ -1,6 +1,12 @@
-#include "ppspinner.h"
+///////////////////////////////////
+// PebblePieces: Reusable Pebble components.
+// by Roger Braunstein 2013
+//
+// PPSpinner
+// Animated, customizable "stepping bar" indefinite loader
+///////////////////////////////////
 
-#define GETDATA(layer) PPSpinnerData *data = (PPSpinnerData *)layer_get_data(layer)
+#include "ppspinner.h"
 
 typedef struct {
 
@@ -17,13 +23,13 @@ typedef struct {
 
 
 static void ppspinner_handle_timer(void *layer) {
-  GETDATA(layer);
+  PPSpinnerData *data = (PPSpinnerData *)layer_get_data(layer);
   data->timer = app_timer_register(data->update_ms, ppspinner_handle_timer, layer);
   layer_mark_dirty((Layer *)layer);
 }
 
 static void ppspinner_update(Layer *layer, GContext *g) {
-  GETDATA(layer);
+  PPSpinnerData *data = (PPSpinnerData *)layer_get_data(layer);
   GRect bounds = layer_get_frame(layer);
   // cache some values on stack
   int frame_number = ++data->current_frame;
@@ -52,7 +58,7 @@ static void ppspinner_update(Layer *layer, GContext *g) {
 }
 
 void ppspinner_start(PPSpinnerLayer *layer) {
-  GETDATA(layer);
+  PPSpinnerData *data = (PPSpinnerData *)layer_get_data(layer);
   if (data->timer != NULL) {
     APP_LOG(APP_LOG_LEVEL_WARNING, "Already running");
   } else {
@@ -61,7 +67,7 @@ void ppspinner_start(PPSpinnerLayer *layer) {
 }
 
 void ppspinner_stop(PPSpinnerLayer *layer) {
-  GETDATA(layer);
+  PPSpinnerData *data = (PPSpinnerData *)layer_get_data(layer);
   if (data->timer == NULL) {
     APP_LOG(APP_LOG_LEVEL_WARNING, "Already stopped");
   } else {
@@ -79,7 +85,7 @@ PPSpinnerLayer *ppspinner_create(GRect frame, int segments, int corner_radius, i
   PPSpinnerLayer *layer = layer_create_with_data(frame, sizeof(PPSpinnerData));
   layer_set_update_proc(layer, ppspinner_update);
 
-  GETDATA(layer);
+  PPSpinnerData *data = (PPSpinnerData *)layer_get_data(layer);
   data->segments = segments;
   data->update_ms = update_ms;
   data->corner_radius = corner_radius;
