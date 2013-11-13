@@ -54,8 +54,7 @@ void pptoaster_draw(struct Layer *layer, GContext *g) {
 
 void pptoaster_handle_animation_out_stopped(Animation *animation, bool finished, void *property_animation_context) {
   if (!finished) return;
-  pptoaster_destroy_animation();
-  layer_set_hidden(pptoaster.layer, true);
+  pptoaster_clear();
 }
 
 void pptoaster_handle_animation_in_stopped(Animation *animation, bool finished, void *property_animation_context) {
@@ -89,6 +88,12 @@ void pptoaster_handle_animation_in_stopped(Animation *animation, bool finished, 
 
 void pptoaster_handle_animation_in_started(Animation *animation, void *ctx) {
   layer_set_hidden(pptoaster.layer, false);
+}
+
+void pptoaster_clear() {
+  pptoaster_destroy_animation();
+  layer_set_hidden(pptoaster.layer, true);
+  layer_remove_from_parent(pptoaster.layer);
 }
 
 void pptoaster_pop(char* message, int show_duration, PPToasterAppearDirection direction) {

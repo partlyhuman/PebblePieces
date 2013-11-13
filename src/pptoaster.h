@@ -16,5 +16,6 @@ typedef enum {
 } PPToasterAppearDirection;
 
 void pptoaster_pop(char* message, int duration, PPToasterAppearDirection direction);
+void pptoaster_clear();
 void pptoaster_set_system_font(char* font_name);
 void pptoaster_deinit();
