@@ -1,3 +1,11 @@
+///////////////////////////////////
+// PebblePieces: Reusable Pebble components.
+// by Roger Braunstein 2013
+//
+// PPBitmap
+// Missing utilities for in-memory bitmap manipulation
+///////////////////////////////////
+
 #include <pebble.h>
 
 GBitmap* pp_gbitmap_create(uint16_t w, uint16_t h);

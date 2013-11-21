@@ -21,6 +21,8 @@ ppspinner_start(my_spinner);
 ppspinner_stop(my_spinner);
 ppspinner_destroy(my_spinner);
 ```
+##PPBitmap
+Not really a component. Utilities for messing about with bitmaps directly in-memory, instead of a graphics context. Uses normal ``GBitmap``s. You can either allocate a new bitmap in memory (conspicuously missing in the SDK), or manipulate an existing one. Pixel manipulation functions are marked inline, should be fast enough for most animation stuff. 
 
 ##Contributions
 That's all for now. I have a console window that I may add in. If you have your own reusable components, please consider contributing them!

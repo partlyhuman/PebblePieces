@@ -1,3 +1,11 @@
+///////////////////////////////////
+// PebblePieces: Reusable Pebble components.
+// by Roger Braunstein 2013
+//
+// PPBitmap
+// Missing utilities for in-memory bitmap manipulation
+///////////////////////////////////
+
 #include "ppbitmap.h"
 
 //integer divides a into b, rounding up instead of down
