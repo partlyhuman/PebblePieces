@@ -1,4 +1,6 @@
 #include <pebble.h>
+#define NDEBUG
+#include <assert.h>
 #include "ppbitmap.h"
 
 #define MIN(a, b) ((a<b)? a : b)
@@ -9,20 +11,23 @@ static GBitmap *bmp;
 static void update(void *ctx) {
     static uint8_t counter;
     counter++;
-    pp_gbitmap_clear(bmp, GColorWhite);
+    ppbmp_clear(bmp, GColorWhite);
     
     //halftone
-    for (uint16_t y = 0; y < pp_gbitmap_height(bmp); y += 2) {
-        for (uint16_t x = (counter++) % 2; x < pp_gbitmap_width(bmp); x += 2) {
-            pp_gbitmap_setpixel(bmp, x, y, GColorBlack);
+    for (uint16_t y = 0; y < ppbmp_height(bmp); y += 2) {
+        for (uint16_t x = (counter++) % 2; x < ppbmp_width(bmp); x += 2) {
+            ppbmp_setpixel(bmp, x, y, GColorBlack);
         }
     }
     
     //diagonal UL->BR
-    uint16_t upper = MIN(pp_gbitmap_width(bmp), pp_gbitmap_height(bmp));
+    uint16_t upper = MIN(ppbmp_width(bmp), ppbmp_height(bmp));
     for (uint16_t y = 0; y < upper; y++) {
-        pp_gbitmap_setpixel(bmp, y, y, GColorBlack);
+        ppbmp_setpixel(bmp, y, y, GColorBlack);
     }
+    
+    //block
+    ppbmp_fillrect(bmp, GRect(10, 10, 10 + (counter % 10), 10 + (counter % 10)), GColorBlack);
     
     
     layer_mark_dirty(bitmap_layer_get_layer((BitmapLayer *)ctx));
@@ -39,14 +44,26 @@ static void window_load(Window *window) {
     //    text_layer_set_text(textlayer, "Hello world");
     //    layer_add_child(windowlayer, text_layer_get_layer(textlayer));
     
-    bmp = pp_gbitmap_create(100, 124);
+    bmp = ppbmp_gbitmap_create(100, 124);
+    uint16_t y = 50;
+    for (uint16_t x = 0; x < ppbmp_width(bmp); x++) {
+        ppbmp_setpixel(bmp, x, y, GColorWhite);
+    }
+    y = 51;
+    for (uint16_t x = 0; x < ppbmp_width(bmp); x++) {
+        ppbmp_setpixel(bmp, x, y, GColorBlack);
+    }
+    assert(GColorWhite == pp_gbitmap_getpixel(bmp, 50, 50));
+    assert(GColorBlack == pp_gbitmap_getpixel(bmp, 51, 51));
+    
+    
     GRect bounds = bmp->bounds;
     bounds.origin = GPoint(22, 22);
     BitmapLayer *bitmaplayer = bitmap_layer_create(bounds);
     bitmap_layer_set_bitmap(bitmaplayer, bmp);
     layer_add_child(windowlayer, bitmap_layer_get_layer(bitmaplayer));
     
-    app_timer_register(100, update, bitmaplayer);
+    app_timer_register(1500, update, bitmaplayer);
 }
 
 static void window_unload(Window *window) {

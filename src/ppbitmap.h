@@ -8,10 +8,11 @@
 
 #include <pebble.h>
 
-GBitmap* pp_gbitmap_create(uint16_t w, uint16_t h);
-void pp_gbitmap_clear(GBitmap *gbitmap, GColor color);
-void pp_gbitmap_setpixel(GBitmap *gbitmap, uint16_t x, uint16_t y, GColor color);
-GColor pp_gbitmap_getpixel(GBitmap *gbitmap, uint16_t x, uint16_t y);
+GBitmap* ppbmp_gbitmap_create(uint16_t w, uint16_t h);
+void ppbmp_clear(GBitmap *gbitmap, GColor color);
+void ppbmp_fillrect(GBitmap *gbitmap, GRect rect, GColor color);
+void ppbmp_setpixel(GBitmap *gbitmap, uint16_t x, uint16_t y, GColor color);
+GColor ppbmp_getpixel(GBitmap *gbitmap, uint16_t x, uint16_t y);
 
-#define pp_gbitmap_width(gbitmap) gbitmap->bounds.size.w
-#define pp_gbitmap_height(gbitmap) gbitmap->bounds.size.h
+#define ppbmp_width(gbitmap) gbitmap->bounds.size.w
+#define ppbmp_height(gbitmap) gbitmap->bounds.size.h
